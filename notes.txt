@@ -25,7 +25,27 @@ The birds keep improving each generation
 
 
 Fitness function: every x coordinate farther that a bird gets, the more points it scores
-
+Fitness threshold: how many points does a bird need to score in order to be considered the bird we need for the job and we don't need any more generations
 
 Max generations: 30
 once we get past 30 generations, we should have found the perfect bird, if not then we have to try again from the beginning
+
+All these variables get changes in teh config feed forward file
+
+Population member is referred to as a genome
+
+activation mutate rate should be set to zero since we don't really want some of our genomes to get a mutated function by any chance
+
+bias mutate power, rate, and replace rate dictate how likely bias is going to mutate when we get a new generation
+
+connection add and delete probability are the likelyhood we are to add or delete a conenction 
+
+enabled default is set to true which means that all connections are active by default, however, 
+the enable mutate rate is set to 1% which means that there is a 1% chance that a connection becomes deactivated
+
+Initial connection is set to full since we are going to have fully connected layers to start the network with
+
+We are going to have 0 hidden neurons to start, 3 input neurons, and 1 output neuron, since we determined that there are 3 possible inputs and 1 possible output
+
+maximum stagnation level is set to 20 which means that if we are willing to go 20 generations even if there isn't an increase in fitness level (score)
+

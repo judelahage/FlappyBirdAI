@@ -6,6 +6,7 @@ import random
 pygame.font.init()
 
 #vars
+GEN = 0
 windowWIDTH = 500
 windowHEIGHT = 800
 gameVel = 5 #global speed at which the background and pipes will move at
@@ -159,27 +160,45 @@ class Base:
         win.blit(self.IMG, (self.x2, self.y)) #draw the second copy of the iamge
             
             
-def draw_window(win, bird, pipes, base, score):
+def draw_window(win, birds, pipes, base, score, gen):
     #win.blit just draws onto the window
     win.blit(BACKGROUNDIMG, (0,0)) #draws background
     for pipe in pipes:
         pipe.draw(win)
         
-    bird.draw(win) #draws bird
+    for bird in birds:
+        bird.draw(win)
     text = STATFONT.render("Score: " + str(score), 1,(255, 255, 255))
     win.blit(text, (windowWIDTH - 10 - text.get_width(), 10))
+    
+    text = STATFONT.render("Gen: " + str(score), 1,(255, 255, 255))
+    win.blit(text, (10, 10))
+    
     base.draw(win)
     pygame.display.update()
 
 def main(genomes, config): #main method
-    
+    global GEN
+    GEN += 1
+    nets = [] #keep track of the neural network for the birds
+    ge = [] #keep track of genomes
     birds = [] #create new bird
+    
+    for _, g in genomes:
+        net = neat.nn.FeedForwardNetwork.create(g, config) #set up the neural network
+        nets.append(net) #append it to the list
+        birds.append(Bird(birdStartingX, birdStartingY)) #then append a new bird object to the list
+        g.fitness = 0 #the starting fitness for every genome is zero
+        ge.append(g) #add the genome to the list
+
+
     baseLevel = windowHEIGHT - 70
     base = Base(baseLevel)
     pipes = [Pipe(pipeGAP)]
     win = pygame.display.set_mode((windowWIDTH, windowHEIGHT))
     #the tick rate is too fast which results in the bird nosediving into the ground too fast
     clock = pygame.time.Clock()
+    score = 0 #stores the current score of the player, obviously AI is playing
     run = True
     
     while run:
@@ -187,16 +206,35 @@ def main(genomes, config): #main method
         for event in pygame.event.get():
             if event.type == pygame.QUIT: #ig pygame detects an event that the user quit the game, ie click the x at the top of the window, then we indicate to stop running
                 run = False
-        #while the game is running, obviously the bird has to move
-        #bird.move() #bird continually moves, and points downwards as it starts nosediving at a negative velocity since it is not jumping at all to fight gravity
+                pygame.quit()
+                quit()
+        #we have to make the birds move accordingly to the neural network
+        pipeInd = 0 #indicator for which pipe the bird should be looking at
+        if len(birds) > 0: #if there are birds left in the list
+            if len(pipes) > 1 and birds[0].x > pipes[0].x + pipes[0].PIPE_TOP.get_width(): #if there is more than one pipe and the bird has passed the current pipe
+                pipeInd = 1 #look at the next pipe
+        else:
+            run = False
+            break        
+        for x, bird in enumerate(birds):
+            bird.move()
+            ge[x].fitness += 0.1 #give the bird just a tad bit of fitness for moving forward, only give a little since the loop is executing 30 times a second
+            
+            output = nets[x].activate((bird.y, abs(bird.y - pipes[pipeInd].height), abs(bird.y-pipes[pipeInd].bottom))) #activates the neural network and passes the value to the function to see if we pass the threshhold we want in order to say a bird should jump or not
+            if output[0] > 0.5:
+                bird.jump()
+            
         base.move() #base continually moves
         rem = [] #list of removed pipes
-        score = 0 #stores the current score of the player, obviously AI is playing
         addPipe = False
         for pipe in pipes: #pipes have to move too
-            for bird in birds:
+            for x, bird in enumerate(birds): #loop through the birds in an enumerated list so that you can get the index 
                 if pipe.collide(bird): #first check if pipe collides
-                    pass
+                    ge[x].fitness -= 1 #every tiome a bird hits a pipe, it is going to have 1 remoed from its fitness score
+                    birds.pop(x)
+                    nets.pop(x)
+                    ge.pop(x)
+                    
                 if not pipe.passed and pipe.x < bird.x: #if the pipe has not been passed and the bird crosses the x coord of the pipe, then we update the status of the pipe to passed
                     pipe.passed = True
                     addPipe = True #determines whether we should add another pipe if the current one was passed
@@ -207,21 +245,21 @@ def main(genomes, config): #main method
             pipe.move()
         
         if addPipe: #if we have to add another pipe
-            score += 1
+            score +=1
+            for g in ge:
+                g.fitness += 5 #increment fitness by 5 if the bird scores so that the birds that make it through are pushed forward
             pipes.append(Pipe(pipeGAP)) #new pipe gets added to the list of pipes so that new pipes keep showing up
         
         for pipe in rem: #eliminate any pipes tat got sent to the remove list
             pipes.remove(pipe)
         
-        for bird in birds:
-            if bird.y + bird.img.get_height() > baseLevel:
-                pass
+        for x, bird in enumerate(birds):
+            if bird.y + bird.img.get_height() >= baseLevel or bird.y < 0:
+                birds.pop(x)
+                nets.pop(x)
+                ge.pop(x)
         
-        draw_window(win, bird, pipes, base, score)
-    pygame.quit()
-    quit()
-
-main()
+        draw_window(win, birds, pipes, base, score, GEN)
 
 def run(configPath):
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPath) #setting all the properties from the config file

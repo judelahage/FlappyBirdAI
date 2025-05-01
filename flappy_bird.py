@@ -3,20 +3,23 @@ import neat
 import os
 import time
 import random
+pygame.font.init()
 
-#window dimensions
+#vars
 windowWIDTH = 500
 windowHEIGHT = 800
 gameVel = 5 #global speed at which the background and pipes will move at
-birdStartingX = 230
-birdStartingY = 350
-
+birdStartingX = 230 #bird starting x coord
+birdStartingY = 350 #bird starting y coord
+pipeGAP = 700 #gap in between pipes
 
 #loading the three bird images so it looks liek there is animation of it flapping wings
 BIRDIMGS = [pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird1.png"))), pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird2.png"))), pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird3.png")))]
 PIPEIMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "pipe.png")))
 BASEIMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "base.png")))
 BACKGROUNDIMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bg.png")))
+STATFONT = pygame.font.SysFont("comicsans", 50) #sets the font
+
 
 class Bird:
     IMGS = BIRDIMGS
@@ -156,21 +159,24 @@ class Base:
         win.blit(self.IMG, (self.x2, self.y)) #draw the second copy of the iamge
             
             
-def draw_window(win, bird, pipes, base):
+def draw_window(win, bird, pipes, base, score):
     #win.blit just draws onto the window
     win.blit(BACKGROUNDIMG, (0,0)) #draws background
     for pipe in pipes:
         pipe.draw(win)
         
     bird.draw(win) #draws bird
+    text = STATFONT.render("Score: " + str(score), 1,(255, 255, 255))
+    win.blit(text, (windowWIDTH - 10 - text.get_width(), 10))
     base.draw(win)
     pygame.display.update()
 
 def main(): #main method
     
     bird = Bird(birdStartingX, birdStartingY) #create new bird
-    base = Base(windowHEIGHT - 70)
-    pipes = [Pipe(700)]
+    baseLevel = windowHEIGHT - 70
+    base = Base(baseLevel)
+    pipes = [Pipe(pipeGAP)]
     win = pygame.display.set_mode((windowWIDTH, windowHEIGHT))
     #the tick rate is too fast which results in the bird nosediving into the ground too fast
     clock = pygame.time.Clock()
@@ -202,12 +208,15 @@ def main(): #main method
             pipe.move()
         if addPipe: #if we have to add another pipe
             score += 1
-            pipes.append(Pipe(700)) #new pipe gets added to the list of pipes so that new pipes keep showing up
+            pipes.append(Pipe(pipeGAP)) #new pipe gets added to the list of pipes so that new pipes keep showing up
         
         for pipe in rem: #eliminate any pipes tat got sent to the remove list
             pipes.remove(pipe)
-            
-        draw_window(win, bird, pipes, base)
+        
+        if bird.y + bird.img.get_height() > baseLevel:
+            pass
+        
+        draw_window(win, bird, pipes, base, score)
     pygame.quit()
     quit()
 

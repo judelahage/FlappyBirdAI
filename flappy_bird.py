@@ -56,5 +56,31 @@ class Bird:
             if self.tilt > -90:
                 self.tilt -= self.ROTVEL
             
+    def draw(self, win):
+        #we have to track the image count in order to animate the bird
+        #so
+        self.imgCount += 1
+        
+        if self.imgCount < self.ANIMATIONTIME: #cycle through images up and down as ANIMATIONTIME goes up
+            self.img = self.IMGS[0]
+        elif self.imgCount < self.ANIMATIONTIME*2:
+            self.img = self.IMGS[1]
+        elif self.imgCount < self.ANIMATIONTIME*3:
+            self.img = self.IMGS[2]
+        elif self.imgCount < self.ANIMATIONTIME*4:
+            self.img = self.IMGS[1]
+        elif self.imgCount < self.ANIMATIONTIME*4 + 1:
+            self.img = self.IMGS[0]
+            self.imgCount = 0
+        
+        #if the bird is tilted downwards we don't want wings to be flapping
+        if self.tilt < 80:
+            self.img = self.IMGS[1] #we goesshow the image where the wings of the bird are level
+            self.imgCount = self.ANIMATIONTIME*2 #resets the imgCount to 2 times the ANIMATION time so that the bird image resets to the correct image in case the tilt changes
+        
+        rotatedImage = pygame.transform.rotate(self.img, self.tilt) #this stores the rotated image, however this is not rotated around the center
+        newRectangle = rotatedImage.get_rect(center = self.img.get_rect(topleft = (self.x, self.y)).center) #this makes i so that the image is rotated about the center instead
+        win.blit(rotatedImage, newRectangle.topleft)
+        
             
         

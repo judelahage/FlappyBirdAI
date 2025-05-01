@@ -171,9 +171,9 @@ def draw_window(win, bird, pipes, base, score):
     base.draw(win)
     pygame.display.update()
 
-def main(): #main method
+def main(genomes, config): #main method
     
-    bird = Bird(birdStartingX, birdStartingY) #create new bird
+    birds = [] #create new bird
     baseLevel = windowHEIGHT - 70
     base = Base(baseLevel)
     pipes = [Pipe(pipeGAP)]
@@ -188,24 +188,24 @@ def main(): #main method
             if event.type == pygame.QUIT: #ig pygame detects an event that the user quit the game, ie click the x at the top of the window, then we indicate to stop running
                 run = False
         #while the game is running, obviously the bird has to move
-        bird.move() #bird continually moves, and points downwards as it starts nosediving at a negative velocity since it is not jumping at all to fight gravity
+        #bird.move() #bird continually moves, and points downwards as it starts nosediving at a negative velocity since it is not jumping at all to fight gravity
         base.move() #base continually moves
         rem = [] #list of removed pipes
         score = 0 #stores the current score of the player, obviously AI is playing
         addPipe = False
         for pipe in pipes: #pipes have to move too
-            if pipe.collide(bird): #first check if pipe collides
-                pass
-            if pipe.x + pipe.PIPE_TOP.get_width() < 0: #check if pipe is completely off the screen
-                #remove pipe
-                rem.append(pipe)
+            for bird in birds:
+                if pipe.collide(bird): #first check if pipe collides
+                    pass
+                if not pipe.passed and pipe.x < bird.x: #if the pipe has not been passed and the bird crosses the x coord of the pipe, then we update the status of the pipe to passed
+                    pipe.passed = True
+                    addPipe = True #determines whether we should add another pipe if the current one was passed
             
-            if not pipe.passed and pipe.x < bird.x: #if the pipe has not been passed and the bird crosses the x coord of the pipe, then we update the status of the pipe to passed
-                pipe.passed = True
-                addPipe = True #determines whether we should add another pipe if the current one was passed
-                
-
+        
+            if pipe.x + pipe.PIPE_TOP.get_width() < 0: #check if pipe is completely off the screen
+                rem.append(pipe)   #remove pipe
             pipe.move()
+        
         if addPipe: #if we have to add another pipe
             score += 1
             pipes.append(Pipe(pipeGAP)) #new pipe gets added to the list of pipes so that new pipes keep showing up
@@ -213,11 +213,28 @@ def main(): #main method
         for pipe in rem: #eliminate any pipes tat got sent to the remove list
             pipes.remove(pipe)
         
-        if bird.y + bird.img.get_height() > baseLevel:
-            pass
+        for bird in birds:
+            if bird.y + bird.img.get_height() > baseLevel:
+                pass
         
         draw_window(win, bird, pipes, base, score)
     pygame.quit()
     quit()
 
 main()
+
+def run(configPath):
+    config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, configPath) #setting all the properties from the config file
+    genCount = 50
+    pop = neat.Population(config) #stores a newly generated population based on the config we gave neat
+    pop.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    pop.add_reporter(stats)
+    
+    winner = pop.run(main,genCount) #runs main for however many generations we want
+
+if __name__ == "__main__":
+    localDir = os.path.dirname(__file__) #gets the local directory we are in
+    configPath = os.path.join(localDir, "config-feedforward.txt") #gets the config file path from our directory
+    run(configPath)
+    

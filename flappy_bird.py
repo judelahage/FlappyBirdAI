@@ -5,7 +5,7 @@ import time
 import random
 
 #window dimensions
-windowWIDTH = 600
+windowWIDTH = 500
 windowHEIGHT = 800
 
 #loading the three bird images so it looks liek there is animation of it flapping wings
@@ -18,7 +18,7 @@ class Bird:
     IMGS = BIRDIMGS
     MAXROTATION = 25 #degrees, so that when the bird moves up, it looks like it is tilting up towards the sky
     ROTVEL = 20
-    ANIMATIONTIME = 5 #how fast the bird will look like it is flapping its wings
+    ANIMATIONTIME = 20 #how fast the bird will look like it is flapping its wings
     
     #initialize bird
     def __init__(self, x, y): #the bird has x and y coords
@@ -74,7 +74,7 @@ class Bird:
             self.imgCount = 0
         
         #if the bird is tilted downwards we don't want wings to be flapping
-        if self.tilt < 80:
+        if self.tilt < -80:
             self.img = self.IMGS[1] #we goesshow the image where the wings of the bird are level
             self.imgCount = self.ANIMATIONTIME*2 #resets the imgCount to 2 times the ANIMATION time so that the bird image resets to the correct image in case the tilt changes
         
@@ -84,6 +84,8 @@ class Bird:
         
     def get_mask(self):
         return pygame.mask.from_surface(self.img)
+
+
 
 def draw_window(win, bird):
     #win.blit just draws onto the window
@@ -97,14 +99,18 @@ def main(): #main method
     
     bird = Bird(startingX, startingY) #create new bird
     
-    win = pygame.display.set_mode(windowWIDTH, windowHEIGHT)
-    
+    win = pygame.display.set_mode((windowWIDTH, windowHEIGHT))
+    #the tick rate is too fast which results in the bird nosediving into the ground too fast
+    clock = pygame.time.Clock()
     run = True
     
     while run:
+        clock.tick(30) #this delays the rate at which the bird can fall
         for event in pygame.event.get():
-            if event/type == pygame.QUIT: #ig pygame detects an event that the user quit the game, ie click the x at the top of the window, then we indicate to stop running
+            if event.type == pygame.QUIT: #ig pygame detects an event that the user quit the game, ie click the x at the top of the window, then we indicate to stop running
                 run = False
+        #while the game is running, obviously the bird has to move
+        bird.move() #bird continually moves, and points downwards as it starts nosediving at a negative velocity since it is not jumping at all to fight gravity
         draw_window(win, bird)
     pygame.quit()
     quit()

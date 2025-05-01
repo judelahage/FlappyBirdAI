@@ -127,14 +127,32 @@ class Pipe:
             return True #return true that yes there is a collision
         
         return False #otherwise return false
-    
-        
-        
-    
-    
 
+class Base:
+    WIDTH = BASEIMG.get_width()
+    IMG = BASEIMG
+    
+    #dont need to define x since it is going to be moving to the left
+    def __init__(self, y):
+        self.y = y
+        self.x1 = 0 #x1 is the x coord of the first copy of the base image
+        self.x2 = self.WIDTH #x2 is the x coord of the second copy of the base image
+    
+    def move(self):
+        self.x1 -= gameVel
+        self.x2 -= gameVel
         
-
+        if self.x1 < -self.WIDTH: #if the x coord of the beginning of the bg image is less then it has to get rotated out
+            self.x1 = self.x2 + self.WIDTH
+        
+        if self.x2 < -self.WIDTH: #same thing for this one
+            self.x2 = self.x1 + self.WIDTH
+            
+    def draw(self, win):
+        win.blit(self.IMG, (self.x1, self.y)) #draw the first copy of the image
+        win.blit(self.IMG, (self.x2, self.y)) #draw the second copy of the iamge
+            
+            
 def draw_window(win, bird):
     #win.blit just draws onto the window
     win.blit(BACKGROUNDIMG, (0,0)) #draws background

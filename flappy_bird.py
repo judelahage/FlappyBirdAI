@@ -45,15 +45,15 @@ class Bird:
         displacement = self.vel * self.tickCount + 1.5 * self.tickCount**2 #records the amount of distance that the bird moves in the frame
         
         #we have to implement a terminal velocity however, we don't want the velocity to get infinitely large
-        if d >= 16: #if d gets to 16, then we keep it at 16
-            d = 16; 
+        if displacement >= 16: #if d gets to 16, then we keep it at 16
+            displacement = 16; 
 
-        if(d<0): #if d is negative, meaning were jumping, then that means that we make it more negative so the jumps get stronger and stronger
-            d -= 2
+        if(displacement<0): #if d is negative, meaning were jumping, then that means that we make it more negative so the jumps get stronger and stronger
+            displacement -= 2
             
-        self.y += d #the y just hanges by d, and the bird only moves in the y direction, the background and tubes will move in x direction
+        self.y += displacement #the y just hanges by d, and the bird only moves in the y direction, the background and tubes will move in x direction
         
-        if d < 0 or self.y < self.height + 50: #basically we have to see, in the middle of the jump, if the bird is currently above the original y coordinate from where it jumped, then it should be tilted up
+        if displacement < 0 or self.y < self.height + 50: #basically we have to see, in the middle of the jump, if the bird is currently above the original y coordinate from where it jumped, then it should be tilted up
             if self.tilt < self.MAXROTATION:
                 self.tilt = self.MAXROTATION
         else:
@@ -112,7 +112,7 @@ class Pipe:
     
     def draw(self, win):
         win.blit(self.PIPE_BOTTOM, (self.x, self.bottom))
-        win.blie(self.PIPE_TOP, (self.x, self.top))
+        win.blit(self.PIPE_TOP, (self.x, self.top))
         
     def collide(self, bird):
         birdMask = bird.get_mask() #bird mask is basically a hitbox for the bird, it acts as an array which sotres all the pixels of the bird png file which are not transparent
@@ -169,7 +169,8 @@ def draw_window(win, bird, pipes, base):
 def main(): #main method
     
     bird = Bird(birdStartingX, birdStartingY) #create new bird
-    
+    base = Base(windowHEIGHT - 70)
+    pipes = [Pipe(700)]
     win = pygame.display.set_mode((windowWIDTH, windowHEIGHT))
     #the tick rate is too fast which results in the bird nosediving into the ground too fast
     clock = pygame.time.Clock()
@@ -182,7 +183,31 @@ def main(): #main method
                 run = False
         #while the game is running, obviously the bird has to move
         bird.move() #bird continually moves, and points downwards as it starts nosediving at a negative velocity since it is not jumping at all to fight gravity
-        draw_window(win, bird)
+        base.move() #base continually moves
+        rem = [] #list of removed pipes
+        score = 0 #stores the current score of the player, obviously AI is playing
+        addPipe = False
+        for pipe in pipes: #pipes have to move too
+            if pipe.collide(bird): #first check if pipe collides
+                pass
+            if pipe.x + pipe.PIPE_TOP.get_width() < 0: #check if pipe is completely off the screen
+                #remove pipe
+                rem.append(pipe)
+            
+            if not pipe.passed and pipe.x < bird.x: #if the pipe has not been passed and the bird crosses the x coord of the pipe, then we update the status of the pipe to passed
+                pipe.passed = True
+                addPipe = True #determines whether we should add another pipe if the current one was passed
+                
+
+            pipe.move()
+        if addPipe: #if we have to add another pipe
+            score += 1
+            pipes.append(Pipe(700)) #new pipe gets added to the list of pipes so that new pipes keep showing up
+        
+        for pipe in rem: #eliminate any pipes tat got sent to the remove list
+            pipes.remove(pipe)
+            
+        draw_window(win, bird, pipes, base)
     pygame.quit()
     quit()
 

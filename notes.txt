@@ -1,0 +1,31 @@
+AI Notes
+
+
+inputs:
+bird y coord, 
+distance between bird and next top pipe,
+distance between bird and next bottom pipe
+
+
+outputs:
+either jump or dont jump
+
+
+activation function: tanh(x)
+--the domain of tanh(x) is -infinity to infinity
+--the range of the tanh(x) is -1 to 1
+if the output of the tanh(x) function is greater than our set threshold then we tell the bird to jump, otherwise it doesnt jump.
+
+
+POSSIBLE THRESHOLD: 0.5
+
+
+Population size(how many birds will be running in each generation): 100 birds
+The birds keep improving each generation
+
+
+Fitness function: every x coordinate farther that a bird gets, the more points it scores
+
+
+Max generations: 30
+once we get past 30 generations, we should have found the perfect bird, if not then we have to try again from the beginning

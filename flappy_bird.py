@@ -111,6 +111,23 @@ class Pipe:
         win.blit(self.PIPE_BOTTOM, (self.x, self.bottom))
         win.blie(self.PIPE_TOP, (self.x, self.top))
         
+    def collide(self, bird):
+        birdMask = bird.get_mask() #bird mask is basically a hitbox for the bird, it acts as an array which sotres all the pixels of the bird png file which are not transparent
+        topMask = pygame.mask.from_surface(self.PIPE_TOP) #mask for top pipe
+        bottomMask = pygame.mask.from_surface(self.PIPE_BOTTOM) #mask for bottom pipe
+        topOffset = (self.x - bird.x, self.top - round(bird.y)) #offset is distance from bird to pipe
+        bottomOffset = (self.x - bird.x, self.bottom - round(bird.y)) #distance from bird to bottom pipe
+        
+        #now we need to find the point of collision if the masks collide
+        
+        bPoint = birdMask.overlap(bottomMask, bottomOffset) #gets the point of collision of the birdmask and the bottompipe mask, returns None if not colliding
+        tPoint = birdMask.overlap(topMask, topOffset) #gets the point of collision of the birdmask and the top pipe mask, returns None if not colliding
+        
+        if bPoint or tPoint: #if one of these has a collision, then
+            return True #return true that yes there is a collision
+        
+        return False #otherwise return false
+    
         
         
     

@@ -82,5 +82,31 @@ class Bird:
         newRectangle = rotatedImage.get_rect(center = self.img.get_rect(topleft = (self.x, self.y)).center) #this makes i so that the image is rotated about the center instead
         win.blit(rotatedImage, newRectangle.topleft)
         
-            
-        
+    def get_mask(self):
+        return pygame.mask.from_surface(self.img)
+
+def draw_window(win, bird):
+    #win.blit just draws onto the window
+    win.blit(BACKGROUNDIMG, (0,0)) #draws background
+    bird.draw(win) #draws bird
+    pygame.display.update()
+
+def main(): #main method
+    startingX = 200
+    startingY = 200
+    
+    bird = Bird(startingX, startingY) #create new bird
+    
+    win = pygame.display.set_mode(windowWIDTH, windowHEIGHT)
+    
+    run = True
+    
+    while run:
+        for event in pygame.event.get():
+            if event/type == pygame.QUIT: #ig pygame detects an event that the user quit the game, ie click the x at the top of the window, then we indicate to stop running
+                run = False
+        draw_window(win, bird)
+    pygame.quit()
+    quit()
+
+main()

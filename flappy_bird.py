@@ -7,6 +7,7 @@ import random
 #window dimensions
 windowWIDTH = 500
 windowHEIGHT = 800
+gameVel = 5 #global speed at which the background and pipes will move at
 
 #loading the three bird images so it looks liek there is animation of it flapping wings
 BIRDIMGS = [pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird1.png"))), pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird2.png"))), pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird3.png")))]
@@ -85,7 +86,37 @@ class Bird:
     def get_mask(self):
         return pygame.mask.from_surface(self.img)
 
+class Pipe:
+    GAP = 200 #there is a 200 pixel gap in between each pipe
+    
+    def __init__(self, x): #y coord is random
+        self.x = x
+        self.height = 0
+        self.top = 0 #top of each pipe is default at 0
+        self.bottom = 0 #bottom of each pipe is default at zero, it is important to track top and bottom so we know where it is drawn for collisions
+        self.PIPE_TOP = pygame.transform.flip(PIPEIMG, False, True) #the image of a top pipe is the image we have in the folder flipped
+        self.PIPE_BOTTOM = PIPEIMG #the image of a bottom pipe is just the image we have in the folder
+        self.passed = False #tracks if the pipe was passed or not
+        self.set_height() #defines where the top and bottom of the pipe and their gap
+    
+    def set_height(self):
+        self.height = random.randrange(50,450) #the height of each pipe is a random number
+        self.top = self.height - self.PIPE_TOP.get_height() #the top of the pipe is going to have to be the height position of the pipe minus the actual height of the pipe image in order to get the correct y coordinate placement for pipe
+        self.bottom = self.height + self.GAP #the bottom of he pipe is going to have to be the 
+        
+    def move(self): #the pipe just moves to the left at the rate specified in game vel
+        self.x -= gameVel
+    
+    def draw(self, win):
+        win.blit(self.PIPE_BOTTOM, (self.x, self.bottom))
+        win.blie(self.PIPE_TOP, (self.x, self.top))
+        
+        
+        
+    
+    
 
+        
 
 def draw_window(win, bird):
     #win.blit just draws onto the window

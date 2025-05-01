@@ -8,6 +8,9 @@ import random
 windowWIDTH = 500
 windowHEIGHT = 800
 gameVel = 5 #global speed at which the background and pipes will move at
+birdStartingX = 230
+birdStartingY = 350
+
 
 #loading the three bird images so it looks liek there is animation of it flapping wings
 BIRDIMGS = [pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird1.png"))), pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird2.png"))), pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird3.png")))]
@@ -153,17 +156,19 @@ class Base:
         win.blit(self.IMG, (self.x2, self.y)) #draw the second copy of the iamge
             
             
-def draw_window(win, bird):
+def draw_window(win, bird, pipes, base):
     #win.blit just draws onto the window
     win.blit(BACKGROUNDIMG, (0,0)) #draws background
+    for pipe in pipes:
+        pipe.draw(win)
+        
     bird.draw(win) #draws bird
+    base.draw(win)
     pygame.display.update()
 
 def main(): #main method
-    startingX = 200
-    startingY = 200
     
-    bird = Bird(startingX, startingY) #create new bird
+    bird = Bird(birdStartingX, birdStartingY) #create new bird
     
     win = pygame.display.set_mode((windowWIDTH, windowHEIGHT))
     #the tick rate is too fast which results in the bird nosediving into the ground too fast

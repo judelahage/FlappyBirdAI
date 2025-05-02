@@ -179,7 +179,7 @@ def draw_window(win, birds, pipes, base, score, gen):
 
 def main(genomes, config): #main method
     global GEN
-    GEN += 1
+    
     nets = [] #keep track of the neural network for the birds
     ge = [] #keep track of genomes
     birds = [] #create new bird
@@ -191,7 +191,7 @@ def main(genomes, config): #main method
         g.fitness = 0 #the starting fitness for every genome is zero
         ge.append(g) #add the genome to the list
 
-
+    GEN += 1
     baseLevel = windowHEIGHT - 70
     base = Base(baseLevel)
     pipes = [Pipe(pipeGAP)]

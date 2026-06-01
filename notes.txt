@@ -20,15 +20,15 @@ if the output of the tanh(x) function is greater than our set threshold then we 
 POSSIBLE THRESHOLD: 0.5
 
 
-Population size(how many birds will be running in each generation): 100 birds
+Population size(how many birds will be running in each generation): 20 birds
 The birds keep improving each generation
 
 
 Fitness function: every x coordinate farther that a bird gets, the more points it scores
 Fitness threshold: how many points does a bird need to score in order to be considered the bird we need for the job and we don't need any more generations
 
-Max generations: 30
-once we get past 30 generations, we should have found the perfect bird, if not then we have to try again from the beginning
+Max generations: 50
+once we get past 50 generations, we should have found the perfect bird, if not then we have to try again from the beginning
 
 All these variables get changes in teh config feed forward file
 
